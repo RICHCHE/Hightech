@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Document = require('../models/document'); // เรียกใช้งานโมเดล Document
-const path = require('path');
-const fs = require('fs');
 
 // GET เอกสารทั้งหมด
 router.get('/', async (req, res) => {
@@ -76,32 +74,16 @@ router.get('/download/:id', async (req, res) => {
         const document = await Document.findById(req.params.id);
         if (!document) return res.status(404).json({ message: 'Document not found' });
 
-        // ตรวจสอบว่าโฟลเดอร์ downloads มีอยู่หรือไม่
-        const downloadsDir = path.join(__dirname, '../downloads');
-        if (!fs.existsSync(downloadsDir)) {
-            fs.mkdirSync(downloadsDir); // สร้างโฟลเดอร์ถ้ายังไม่มี
-        }
-
-        // สร้างไฟล์ชั่วคราวจากเนื้อหาเอกสารเพื่อให้ดาวน์โหลด
-        const filePath = path.join(downloadsDir, `${document._id}.txt`);
+        // สร้างไฟล์ชั่วคราวในรูปแบบของ Buffer
         const fileContent = `Topic: ${document.topic}\nWriter: ${document.writer}\nContent: ${document.content}`;
-        
-        // เขียนเนื้อหาเอกสารลงในไฟล์
-        fs.writeFileSync(filePath, fileContent);
+        const buffer = Buffer.from(fileContent, 'utf-8');
 
-        // ตั้งค่า Headers ก่อนการดาวน์โหลด
+        // ตั้งค่า Headers สำหรับการดาวน์โหลด
         res.setHeader('Content-Disposition', `attachment; filename="${document.topic}.txt"`);
         res.setHeader('Content-Type', 'text/plain');
 
-        // ส่งไฟล์ให้กับผู้ใช้เพื่อดาวน์โหลด
-        res.download(filePath, (err) => {
-            if (err) {
-                res.status(500).json({ message: 'Failed to download document' });
-            } else {
-                // ลบไฟล์ชั่วคราวหลังจากส่งให้ผู้ใช้แล้ว
-                fs.unlinkSync(filePath);
-            }
-        });
+        // ส่งไฟล์ Buffer ให้กับผู้ใช้
+        res.send(buffer);
     } catch (err) {
         res.status(500).json({ message: 'Failed to download document', error: err.message });
     }
