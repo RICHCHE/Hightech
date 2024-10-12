@@ -4,7 +4,6 @@ var createError = require('http-errors');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
-const cors = require('cors');
 
 var indexRouter = require('../routes/index'); // Routing สำหรับ API
 var documentsRouter = require('../routes/documents'); // Routing สำหรับเอกสาร
@@ -22,9 +21,6 @@ mongoose.connect(process.env.MONGODB_URI, {
   console.log('MongoDB URI:', process.env.MONGODB_URI); // แสดงค่า URI เมื่อเชื่อมต่อสำเร็จ
 })
 .catch(err => console.error('MongoDB Connection Failed:', err));
-
-// Enable CORS
-app.use(cors());
 
 // Middleware
 app.use(logger('dev'));
