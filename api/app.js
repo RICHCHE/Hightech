@@ -12,15 +12,13 @@ var usersRouter = require('../routes/users'); // Routing สำหรับผ�
 var app = express();
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+// MongoDB connection
+mongoose.connect('mongodb+srv://admin:1234@hightech.dmuzq.mongodb.net/?retryWrites=true&w=majority&appName=Hightech')
 .then(() => {
   console.log('MongoDB Connected');
-  console.log('MongoDB URI:', process.env.MONGODB_URI); // แสดงค่า URI เมื่อเชื่อมต่อสำเร็จ
 })
 .catch(err => console.error('MongoDB Connection Failed:', err));
+
 
 // Middleware
 app.use(logger('dev'));
