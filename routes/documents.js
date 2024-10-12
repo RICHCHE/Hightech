@@ -4,6 +4,72 @@ const Document = require('../models/document'); // เรียกใช้ง�
 const path = require('path');
 const fs = require('fs');
 
+// GET เอกสารทั้งหมด
+router.get('/', async (req, res) => {
+    try {
+        const documents = await Document.find();
+        res.status(200).json(documents);
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to retrieve documents', error: err.message });
+    }
+});
+
+// POST เพิ่มเอกสารใหม่
+router.post('/', async (req, res) => {
+    const { topic, writer, content } = req.body;
+
+    // ตรวจสอบว่าข้อมูลที่จำเป็นครบหรือไม่
+    if (!topic || !writer || !content) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const document = new Document({
+        topic,
+        writer,
+        content
+    });
+
+    try {
+        const newDocument = await document.save();
+        res.status(201).json(newDocument); // ส่งข้อมูลใหม่กลับไป
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to save document', error: err.message });
+    }
+});
+
+// PUT (อัปเดต) เอกสารตาม ID
+router.put('/:id', async (req, res) => {
+    const { topic, writer, content } = req.body;
+
+    try {
+        const document = await Document.findById(req.params.id);
+        if (!document) return res.status(404).json({ message: 'Document not found' });
+
+        // อัปเดตเฉพาะค่าที่ส่งมาใหม่
+        if (topic) document.topic = topic;
+        if (writer) document.writer = writer;
+        if (content) document.content = content;
+
+        const updatedDocument = await document.save();
+        res.status(200).json(updatedDocument); // ส่งข้อมูลใหม่กลับไปหลังจากการอัปเดตสำเร็จ
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to update document', error: err.message });
+    }
+});
+
+// DELETE เอกสารตาม ID
+router.delete('/:id', async (req, res) => {
+    try {
+        const document = await Document.findById(req.params.id);
+        if (!document) return res.status(404).json({ message: 'Document not found' });
+
+        await Document.deleteOne({ _id: req.params.id }); // ลบเอกสาร
+        res.json({ message: 'Document deleted' });
+    } catch (err) {
+        res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    }
+});
+
 // Route สำหรับดาวน์โหลดเอกสาร
 router.get('/download/:id', async (req, res) => {
     try {
@@ -42,4 +108,3 @@ router.get('/download/:id', async (req, res) => {
 });
 
 module.exports = router;
-
