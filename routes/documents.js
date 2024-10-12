@@ -71,10 +71,14 @@ router.delete('/:id', async (req, res) => {
 // Route สำหรับดาวน์โหลดเอกสาร
 router.get('/download/:id', async (req, res) => {
     try {
+        // ดึงเอกสารจาก MongoDB โดยใช้ ID
         const document = await Document.findById(req.params.id);
-        if (!document) return res.status(404).json({ message: 'Document not found' });
+        if (!document) {
+            console.log(`Document with id ${req.params.id} not found.`);
+            return res.status(404).json({ message: 'Document not found' });
+        }
 
-        // สร้างไฟล์ชั่วคราวในรูปแบบของ Buffer
+        // สร้างเนื้อหาเอกสารเป็น Buffer
         const fileContent = `Topic: ${document.topic}\nWriter: ${document.writer}\nContent: ${document.content}`;
         const buffer = Buffer.from(fileContent, 'utf-8');
 
@@ -85,6 +89,8 @@ router.get('/download/:id', async (req, res) => {
         // ส่งไฟล์ Buffer ให้กับผู้ใช้
         res.send(buffer);
     } catch (err) {
+        // แสดงข้อผิดพลาดใน console และส่งสถานะ 500 กลับไป
+        console.error('Error downloading document:', err.message);
         res.status(500).json({ message: 'Failed to download document', error: err.message });
     }
 });
