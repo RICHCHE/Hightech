@@ -12,13 +12,11 @@ var usersRouter = require('../routes/users'); // Routing สำหรับผ�
 var app = express();
 
 // MongoDB connection
-// MongoDB connection
 mongoose.connect('mongodb+srv://admin:1234@hightech.dmuzq.mongodb.net/?retryWrites=true&w=majority&appName=Hightech')
 .then(() => {
   console.log('MongoDB Connected');
 })
 .catch(err => console.error('MongoDB Connection Failed:', err));
-
 
 // Middleware
 app.use(logger('dev'));
@@ -29,8 +27,8 @@ app.use(express.static(path.join(__dirname, '../public'))); // เสิร์�
 
 // Routes
 app.use('/api', indexRouter); // API routes
-app.use('/documents', documentsRouter);
-app.use('/users', usersRouter);
+app.use('/api/documents', documentsRouter); // เปลี่ยนเส้นทางให้เป็น /api/documents
+app.use('/api/users', usersRouter); // เปลี่ยนเส้นทางให้เป็น /api/users
 
 // Fallback route for static files
 app.get('*', (req, res) => {
